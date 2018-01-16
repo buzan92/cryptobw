@@ -16,12 +16,14 @@
     "babel-preset-es2015-node5": "^1.2.0",
     "babel-preset-stage-0": "^6.24.1",
     "babel-register": "^6.26.0",
+    "cluster": "^0.7.7",
     "config": "^1.29.2",
     "koa": "^2.4.1",
     "koa-body": "^2.5.0",
     "koa-convert": "^1.2.0",
     "koa-router": "^7.3.0",
     "mongoose": "^4.13.9",
+    "os": "^0.1.1",
     "pm2": "^2.9.1",
     "request": "^2.83.0"
   }

@@ -3,6 +3,15 @@ import axios from 'axios';
 import Ticker from '../models/ticker'
 
 const apiURL = 'https://bittrex.com/api/v1.1/public/'; //getticker';
+const markets = [
+    'BTC-NEO', 'BTC-ETH', 'BTC-XRP',
+    'BTC-XVG', 'BTC-ADA', 'BTC-SC',
+    'BTC-BCC', 'BTC-XLM', 'BTC-BTG',
+    'BTC-ETC', 'BTC-STRAT', 'BTC-LTC',
+    'BTC-XEM', 'BTC-DGB', 'BTC-QTUM',
+    'BTC-RDD', 'BTC-LSK', 'BTC-DOGE',
+    'BTC-ZEC', 'BTC-XMR'
+];
 //const market = 'BTC-XVG';
 
 const getMarkets = async () => {
@@ -37,12 +46,15 @@ const getTicker = async (market) => {
             params: {
                 market: market
             }
+        }).catch(err => {
+            throw new Error(`axios getOrderBook error: ${err}`);
         });
         const data = response.data;
         if (data.success !== true) {
             const msg = (data.message) ? data.message : '';
             throw new Error(`Unsuccessful getTicker query to bittrex for market: ${market} ${time} msg: ${msg}`);
         } else {
+            console.log(`${time} - ticke - ${market}`);
             const ticker = {
                 time: time,
                 bid: data.result.Bid,
@@ -65,15 +77,18 @@ const getOrderBook = async (market) => {
                 market: market,
                 type: 'both'
             }
+        }).catch(err => {
+            throw new Error(`axios getOrderBook error: ${err}`);
         });
         const data = response.data;
         if (data.success !== true) {
             const msg = (data.message) ? data.message : '';
             throw new Error(`Unsuccessful getOrderBook query for market: ${market} ${time} msg: ${msg}`)
         } else {
+            console.log(`${time} - order - ${market}`);
             const orderBook = {
-                buy: data.result.buy,
-                sell: data.result.sell
+                buy: data.result.buy.slice(0, 10),
+                sell: data.result.sell.slice(0, 10)
             }
             return orderBook;
         }
@@ -84,7 +99,7 @@ const getOrderBook = async (market) => {
 
 const addToDb = async (market, ticker, orderBook) => {
     try {
-        //console.log(orderBook);
+        const time = new Date().toLocaleTimeString();
         const newticker = new Ticker({
             Market: market, 
             Time: ticker.time,
@@ -94,10 +109,11 @@ const addToDb = async (market, ticker, orderBook) => {
             Buy: orderBook.buy,
             Sell: orderBook.sell
         });
+
         await newticker.save().catch(err => {
             throw new Error('Error while save ticker to DB');
         })
-        //console.log(`last ${newticker.Last} sell0 ${newticker.Sell[0].Quantity} `)
+        console.log(`${time} - adddb - ${market}`);
     } catch(err) {
         console.log(err);
     }
@@ -105,14 +121,17 @@ const addToDb = async (market, ticker, orderBook) => {
 
 export async function bittrex() {
        
-    const markets = await getMarkets(); 
+    //const markets = await getMarkets();
     
     setInterval(
         () => {
         markets.forEach(async item => {
             let [ticker, orderBook] = await Promise.all([getTicker(item), getOrderBook(item)]);
-            let x = await addToDb(item, ticker, orderBook);
-        })}, 2000);
+            if (ticker && orderBook) {
+                let x = await addToDb(item, ticker, orderBook);
+            } 
+        })
+    }, 2000);
 }
 
 
