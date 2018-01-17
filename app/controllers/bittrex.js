@@ -54,7 +54,7 @@ const getTicker = async (market) => {
             const msg = (data.message) ? data.message : '';
             throw new Error(`Unsuccessful getTicker query to bittrex for market: ${market} ${time} msg: ${msg}`);
         } else {
-            console.log(`${time} - ticke - ${market}`);
+            //console.log(`${time} - ticke - ${market}`);
             const ticker = {
                 time: time,
                 bid: data.result.Bid,
@@ -85,7 +85,7 @@ const getOrderBook = async (market) => {
             const msg = (data.message) ? data.message : '';
             throw new Error(`Unsuccessful getOrderBook query for market: ${market} ${time} msg: ${msg}`)
         } else {
-            console.log(`${time} - order - ${market}`);
+            //console.log(`${time} - order - ${market}`);
             const orderBook = {
                 buy: data.result.buy.slice(0, 10),
                 sell: data.result.sell.slice(0, 10)
@@ -113,7 +113,7 @@ const addToDb = async (market, ticker, orderBook) => {
         await newticker.save().catch(err => {
             throw new Error('Error while save ticker to DB');
         })
-        console.log(`${time} - adddb - ${market}`);
+        //console.log(`${time} - adddb - ${market}`);
     } catch(err) {
         console.log(err);
     }
