@@ -104,11 +104,11 @@ export async function RSI(market = 'BTC-XVG', periods = 20, duration = 30) {
 
     for (let j = 0; j < portionCount; j++) {
         
-        var t0 = performance.now();
+        console.time('allTickers');
         let allTickers = await tickers(market, 1000, j * 1000);
-        var t1 = performance.now();
-        console.log("Call to allTickers ", (t1 - t0), " ms.")
+        console.timeEnd('allTickers');
 
+        console.time('calcRSI');
         for (let i=0; i < allTickers.length - count; i++) {
             const tickers = allTickers.slice(i, i + count);
             const candles = getCandles(tickers, periods, duration);
@@ -130,6 +130,7 @@ export async function RSI(market = 'BTC-XVG', periods = 20, duration = 30) {
                 }
             }
         }
+        console.timeEnd('calcRSI');
     }
     console.log(result);
     return result;
