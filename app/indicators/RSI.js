@@ -96,6 +96,9 @@ export async function RSI(market = 'BTC-XRP', periods = 20, duration = 30) {
 
     const count = periods * duration; 
     const tickersCount = await getTickersCount(market);
+    if (tickersCount < count) {
+        throw new Error('not enough tickers');
+    }
     const portionCount = Math.ceil(tickersCount / 1000);
     console.log('port count: ', portionCount);
 
@@ -103,10 +106,6 @@ export async function RSI(market = 'BTC-XRP', periods = 20, duration = 30) {
         console.log('j: ', j);
 
         let allTickers = await tickers(market, 1000, j * 1000);
-        if (allTickers.length < count) {
-            throw new Error('not enough tickers');
-        }
-
         for (let i=0; i < allTickers.length - count; i++) {
             const tickers = allTickers.slice(i, i + count);
             const candles = getCandles(tickers, periods, duration);
