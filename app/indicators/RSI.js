@@ -3,14 +3,27 @@ import Ticker from '../models/ticker';
 
 const fee = 0.9975;
 
-const tickers = async(market, limit = 0) => {
+const getTickersCount = async(market) => {
+    try {
+        let result = await Ticker.find({Market: market})
+        .count()
+        .catch(err => {
+            throw new Error('Error while get tickers count from DB')
+        })
+        return result;
+    } catch(err) {
+        console.log(err);
+    }
+}
+
+const tickers = async(market, limit = 0, skip = 0) => {
     try {
         let result = await Ticker.find({Market: market})
         .sort({_id:1})
         .limit(limit)
-        //.skip(2000) //REMOVE THEN
+        .skip(skip) 
         .catch(err => {
-            throw new Error('Error while save ticker to DB');
+            throw new Error('Error while get tickers from DB');
         })
         return result;
     } catch(err) {
@@ -80,32 +93,39 @@ export async function RSI(market = 'BTC-XRP', periods = 20, duration = 30) {
     let isBuying = true;
     let result = [];
 
-    const count = periods * duration; 
-    let allTickers = await tickers(market, 0);
-    if (allTickers.length < count) {
-        throw new Error('not enough tickers');
-    }
 
-    for (let i=0; i < allTickers.length - count; i++) {
-        const tickers = allTickers.slice(i, i + count);
-        const candles = getCandles(tickers, periods, duration);
-        const RSI = calcRSI(candles)
-        //console.log(RSI);
-        if (isBuying) {
-            if (RSI <=30) {
-                balance2 = balance1 / allTickers[i+count].Sell[0].Rate * fee;
-                //balance2 = balance1 / candles[periods-1].Last * fee;
-                balance1 = 0;
-                isBuying = false;
-                result.push(`Покупка по ${allTickers[i+count].Sell[0].Rate} балансы: ${balance1} ${balance2}`);
-            }
-        } else {
-            if (RSI >= 80) {
-                balance1 = balance2 * allTickers[i+count].Buy[0].Rate * fee;
-                //balance1 = balance2 * candles[periods-1].Last * fee;
-                balance2 = 0;
-                isBuying = true;
-                result.push(`Продажа по ${allTickers[i+count].Buy[0].Rate} балансы: ${balance1} ${balance2}`);
+    const count = periods * duration; 
+    const tickersCount = await getTickersCount(market);
+    const portionCount = Math.ceil(tickersCount / 1000);
+    console.log('port count: ', portionCount);
+
+    for (let j = 0; j < portionCount; j++) {
+        console.log('j: ', j);
+
+        let allTickers = await tickers(market, 1000, j * 1000);
+        if (allTickers.length < count) {
+            throw new Error('not enough tickers');
+        }
+
+        for (let i=0; i < allTickers.length - count; i++) {
+            const tickers = allTickers.slice(i, i + count);
+            const candles = getCandles(tickers, periods, duration);
+            const RSI = calcRSI(candles)
+            //console.log(RSI);
+            if (isBuying) {
+                if (RSI <=30) {
+                    balance2 = balance1 / allTickers[i+count].Sell[0].Rate * fee;
+                    balance1 = 0;
+                    isBuying = false;
+                    result.push(`Покупка по ${allTickers[i+count].Sell[0].Rate} балансы: ${balance1} ${balance2}`);
+                }
+            } else {
+                if (RSI >= 80) {
+                    balance1 = balance2 * allTickers[i+count].Buy[0].Rate * fee;
+                    balance2 = 0;
+                    isBuying = true;
+                    result.push(`Продажа по ${allTickers[i+count].Buy[0].Rate} балансы: ${balance1} ${balance2}`);
+                }
             }
         }
     }

@@ -16,7 +16,7 @@ export const markets = [
 
 const getMarkets = async () => {
     try {
-        const time = new Date().toLocaleTimeString();
+        const time = Date.now();//new Date().toLocaleTimeString();
         const URL = apiURL + 'getmarkets';
         const response = await axios.get(URL);
         const data = response.data;
@@ -40,7 +40,6 @@ const getMarkets = async () => {
 
 const getTicker = async (market) => {
     try {
-        const time = new Date().toLocaleTimeString();
         const URL = apiURL + 'getticker';
         const response = await axios.get(URL, {
             params: {
@@ -51,12 +50,13 @@ const getTicker = async (market) => {
         });
         const data = response.data;
         if (data.success !== true) {
+            const time = new Date().toLocaleTimeString();
             const msg = (data.message) ? data.message : '';
             throw new Error(`Unsuccessful getTicker query to bittrex for market: ${market} ${time} msg: ${msg}`);
         } else {
             //console.log(`${time} - ticke - ${market}`);
             const ticker = {
-                time: time,
+                //time: time,
                 bid: data.result.Bid,
                 ask: data.result.Ask,
                 last: data.result.Last
@@ -97,12 +97,12 @@ const getOrderBook = async (market) => {
     }
 }
 
-const addToDb = async (market, ticker, orderBook) => {
+const addToDb = async (market, ticker, orderBook, time) => {
     try {
         const time = new Date().toLocaleTimeString();
         const newticker = new Ticker({
             Market: market, 
-            Time: ticker.time,
+            Time: time,
             Bid: ticker.bid,
             Ask: ticker.ask,
             Last: ticker.last,
@@ -126,9 +126,10 @@ export async function bittrex() {
     setInterval(
         () => {
         markets.forEach(async item => {
+            const time = Date.now();
             let [ticker, orderBook] = await Promise.all([getTicker(item), getOrderBook(item)]);
             if (ticker && orderBook) {
-                let x = await addToDb(item, ticker, orderBook);
+                let x = await addToDb(item, ticker, orderBook, time);
             } 
         })
     }, 2000);
