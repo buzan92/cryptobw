@@ -87,7 +87,7 @@ const tradeRSI = () => {
 }
 
 
-export async function RSI(market = 'BTC-XRP', periods = 20, duration = 30) {
+export async function RSI(market = 'BTC-XVG', periods = 20, duration = 30) {
     let balance1 = 1;
     let balance2 = 0;
     let isBuying = true;
@@ -103,9 +103,12 @@ export async function RSI(market = 'BTC-XRP', periods = 20, duration = 30) {
     console.log('port count: ', portionCount);
 
     for (let j = 0; j < portionCount; j++) {
-        console.log('j: ', j);
-
+        
+        var t0 = performance.now();
         let allTickers = await tickers(market, 1000, j * 1000);
+        var t1 = performance.now();
+        console.log("Call to allTickers ", (t1 - t0), " ms.")
+
         for (let i=0; i < allTickers.length - count; i++) {
             const tickers = allTickers.slice(i, i + count);
             const candles = getCandles(tickers, periods, duration);
