@@ -3,7 +3,7 @@ import axios from 'axios';
 import Ticker from '../models/ticker'
 
 const apiURL = 'https://bittrex.com/api/v1.1/public/'; //getticker';
-const markets = [
+export const markets = [
     'BTC-NEO', 'BTC-ETH', 'BTC-XRP',
     'BTC-XVG', 'BTC-ADA', 'BTC-SC',
     'BTC-BCC', 'BTC-XLM', 'BTC-BTG',

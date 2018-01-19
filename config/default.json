@@ -8,7 +8,6 @@
     "mongodb": {
         "url": "mongodb://localhost:27017/cryptobw",
         "options": {
-            "debug": true,
             "useMongoClient": true,
             "promiseLibrary": "global.Promise"
         }
