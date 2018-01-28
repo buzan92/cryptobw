@@ -13,9 +13,10 @@ const numCPUs = os.cpus().length;
 
 
 
-mongoose.Promise = global.Promise;
+
 mongoose.set('debug', true);
 mongoose.connect(config.mongodb.url, config.mongodb.options);
+mongoose.Promise = global.Promise;
 mongoose.connection.on('error', console.error);
 
 const app = new Koa();
@@ -31,9 +32,9 @@ app.listen(config.server.port, function () {
 
 
 
-//bittrex();
-let aa = RSI();
-console.log(aa);
+bittrex();
+//let aa = RSI();
+//console.log(aa);
 
 
 //console.log('process ' + process.pid + ' says hello!')

@@ -19,7 +19,7 @@ const getTickersCount = async(market) => {
 const tickers = async(market, limit = 0, skip = 0) => {
     try {
         let result = await Ticker.find({Market: market})
-        .sort({_id:1})
+        //.sort({_id:1}) ???
         .limit(limit)
         .skip(skip) 
         .catch(err => {
@@ -87,7 +87,7 @@ const tradeRSI = () => {
 }
 
 
-export async function RSI(market = 'BTC-XVG', periods = 20, duration = 30) {
+export async function RSI(market = 'BTC-XRP', periods = 20, duration = 30) {
     let balance1 = 1;
     let balance2 = 0;
     let isBuying = true;
@@ -99,13 +99,13 @@ export async function RSI(market = 'BTC-XVG', periods = 20, duration = 30) {
     if (tickersCount < count) {
         throw new Error('not enough tickers');
     }
-    const portionCount = Math.ceil(tickersCount / 1000);
+    const portionCount = Math.ceil(tickersCount / 2000);
     console.log('port count: ', portionCount);
 
     for (let j = 0; j < portionCount; j++) {
         
         console.time('allTickers');
-        let allTickers = await tickers(market, 1000, j * 1000);
+        let allTickers = await tickers(market, 2000, j * 2000);
         console.timeEnd('allTickers');
 
         console.time('calcRSI');
@@ -115,14 +115,14 @@ export async function RSI(market = 'BTC-XVG', periods = 20, duration = 30) {
             const RSI = calcRSI(candles)
             //console.log(RSI);
             if (isBuying) {
-                if (RSI <=30) {
+                if (RSI <=20) {
                     balance2 = balance1 / allTickers[i+count].Sell[0].Rate * fee;
                     balance1 = 0;
                     isBuying = false;
                     result.push(`Покупка по ${allTickers[i+count].Sell[0].Rate} балансы: ${balance1} ${balance2}`);
                 }
             } else {
-                if (RSI >= 80) {
+                if (RSI >= 70) {
                     balance1 = balance2 * allTickers[i+count].Buy[0].Rate * fee;
                     balance2 = 0;
                     isBuying = true;

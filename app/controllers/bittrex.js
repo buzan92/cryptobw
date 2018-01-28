@@ -1,6 +1,9 @@
 'use strict';
 import axios from 'axios';
-import Ticker from '../models/ticker'
+import mongoose from 'mongoose'
+//import Ticker from '../models/ticker'
+import { tickerShema } from '../models/tickerShema';
+
 
 const apiURL = 'https://bittrex.com/api/v1.1/public/'; //getticker';
 export const markets = [
@@ -98,6 +101,8 @@ const getOrderBook = async (market) => {
 }
 
 const addToDb = async (market, ticker, orderBook, time) => {
+    let modelName = 'bittrex' + market;
+    let Ticker = mongoose.model(modelName, tickerShema);
     try {
         const time = new Date().toLocaleTimeString();
         const newticker = new Ticker({
