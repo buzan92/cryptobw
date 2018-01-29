@@ -101,7 +101,8 @@ const getOrderBook = async (market) => {
 }
 
 const addToDb = async (market, ticker, orderBook, time) => {
-    let modelName = 'bittrex' + market;
+
+    let modelName = 'bittrex' + market.replace('-','');
     let Ticker = mongoose.model(modelName, tickerShema);
     try {
         const time = new Date().toLocaleTimeString();
